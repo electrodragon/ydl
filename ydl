@@ -1,0 +1,54 @@
+#!/bin/bash
+
+Show_Manual () {
+  echo "|*************************************************************|"
+  echo "|                          Paramters:                         |"
+  echo "|                 aud,144,240,360,480,...,best                |"
+  echo "|*************************************************************|"
+  echo "|          aud   -  Download Best Audio !                     |"
+  echo "|          144   -  Download 144p or less available!          |"
+  echo "|                            (Default:360)                    |"
+  echo "|*************************************************************|"
+  echo "|      ydl 'https://www.youtube.com/watch?v=FuXNumBwDOM'      |"
+  echo "|    ydl 720 'https://www.youtube.com/watch?v=BklGhQYKl30'    |"
+  echo "|*************************************************************|"
+  exit 0
+}
+
+Remove_From_Name () {
+  for file in *; do
+    mv "$file" "${file/$1/}"
+  done
+}
+
+Download_File () {
+  mkdir '___YOUTUBE_DOWNLOADER_BIN___'
+  cd '___YOUTUBE_DOWNLOADER_BIN___'
+  IFS='=' read -ra ADDR <<< "$2"
+  case "$1" in
+    best)
+      youtube-dl -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' "$2"
+      ;;
+    aud)
+      youtube-dl -x --audio-format "mp3" --audio-quality 0 "$2"
+      ;;
+    *)
+      youtube-dl -f "bestvideo[height<=$1]+bestaudio/best[height<=$1]" "$2"
+      ;;
+  esac
+  Remove_From_Name "-${ADDR[1]}"
+  mv * ../
+  cd ../
+  rmdir '___YOUTUBE_DOWNLOADER_BIN___'
+}
+
+if [[ "$1" == "" ]]; then
+  Show_Manual
+elif [[ "$2" == "" ]]; then
+  Download_File '360' "$1"
+else
+  Download_File "$1" "$2"
+fi
+
+
+exit 0
